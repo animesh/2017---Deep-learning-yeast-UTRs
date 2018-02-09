@@ -1,23 +1,23 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: utr
+  name: utrml
   namespace: promec
   labels:
-    kubernetes.io/name: "utr"
+    kubernetes.io/name: "utrml"
 spec:
   ports:
     - port: 80
       targetPort: 80
   selector:
-    app: utr
+    app: utrml
 
 ---
 
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: utr
+  name: utrml
   namespace: promec
   annotations:
     kubernetes.io/tls-acme: "true"
@@ -25,29 +25,29 @@ metadata:
 spec:
   tls:
   - hosts:
-    - utr.promec.ioudaas.no
-    secretName: utr-tls
+    - utrml.promec.ioudaas.no
+    secretName: utrml-tls
   rules:
-  - host: utr.promec.ioudaas.no
+  - host: utrml.promec.ioudaas.no
     http:
       paths:
       - path: /
         backend:
-          serviceName: utr
+          serviceName: utrml
           servicePort: 80
 ---
 
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: utr
+  name: utrml
   namespace: promec
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: utr
+        app: utrml
         driver: nvidia-gpu
     spec:
       containers:
@@ -78,8 +78,8 @@ spec:
           requests:
             cpu: 50m
             memory: 50Mi
-      - name: utr
-        image: gurvin/utr
+      - name: utrml
+        image: gurvin/deep-learning
         imagePullPolicy: Always
         resources:
           limits:
@@ -103,19 +103,19 @@ spec:
         - name: oidcconfig
           secret:
             defaultMode: 420
-            secretName: utr-dataporten
+            secretName: utrml-dataporten
 
 ---
 
 apiVersion: extensions/v1beta1
 kind: NetworkPolicy
 metadata:
-  name: utr
+  name: utrml
   namespace: promec
 spec:
   podSelector:
     matchLabels:
-      app: utr
+      app: utrml
   ingress:
     - from:
       - namespaceSelector:
